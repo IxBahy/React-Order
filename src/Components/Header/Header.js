@@ -3,6 +3,7 @@ import classes from './Header.module.css'
 import headerImage from '../../assets/meals.jpg'
 import MealsSummary from '../MealsSection/MealsSummary/MealsSummary'
 import { HeaderCartButton } from "../HeaderCartButton/HeaderCartButton";
+
 export const Header = () => {
     return (
         <>

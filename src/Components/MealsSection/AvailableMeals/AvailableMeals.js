@@ -6,9 +6,7 @@ export const AvailableMeals = () => {
         <>
             <div className={classes.meals}>
                 <ul>
-                    <Card>
-                        
-                    </Card>
+                    <Card />
                 </ul>
             </div>
         </>
