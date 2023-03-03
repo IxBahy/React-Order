@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useReducer } from 'react'
+import React, { useState, useReducer, useEffect } from 'react'
+import useHttp from '../hooks/useHttp'
 const Context = React.createContext({
     isCartOpened: false,
+    isOrderProcessing: false,
     mealsData: [],
     cartItemsState: [],
     openCartHandler: () => { },
@@ -8,6 +10,11 @@ const Context = React.createContext({
     addCartItemHandler: (itemData) => { },
     removeCartItemHandler: (name) => { },
     incrementCartItem: (name) => { },
+    resetCartHandler: () => { },
+    handleIsOrderProcessing: () => { },
+    isLoading: false,
+    error: null,
+    hasOrdered: false
 })
 
 
@@ -17,6 +24,8 @@ const dispatchHandler = (state, action) => {
         return addState(state, action.value)
     } else if (action.type === 'REMOVE_ITEM') {
         return removeState(state, action.value)
+    } else if (action.type === 'RESET_CART') {
+        return resetCartItems()
     } else {
         return defaultState(state)
     }
@@ -56,6 +65,11 @@ const removeState = (state, value) => {
     updatedState = updatedState.filter(item => item.amount > 0)
     return updatedState
 }
+
+const resetCartItems = () => {
+    return []
+}
+
 const defaultState = (state) => {
     return [...state];
 }
@@ -77,48 +91,46 @@ export const ContextProvider = (props) => {
 
     // local states -> single component
     const [isCartOpened, setIsCartOpened] = useState(false);
+    const [isOrderProcessing, setIsOrderProcessing] = useState(false);
     //global states -> Whole app
     const [cartItemsState, dispatchCartItems] = useReducer(dispatchHandler, [])
+    const [mealsData, setMealsData] = useState([]);
+    const [hasOrdered, setHasOrdered] = useState(false);
+    const { error, isLoading, sendRequest: fetchMealsData } = useHttp()
 
-    const mealsData = [
-        {
-            id: 'm1',
-            name: 'Sushi',
-            description: 'Finest fish and veggies',
-            price: 22.99,
-        },
-        {
-            id: 'm2',
-            name: 'Schnitzel',
-            description: 'A german specialty!',
-            price: 16.5,
-        },
-        {
-            id: 'm3',
-            name: 'Barbecue Burger',
-            description: 'American, raw, meaty',
-            price: 12.99,
-        },
-        {
-            id: 'm4',
-            name: 'Green Bowl',
-            description: 'Healthy...and green...',
-            price: 18.99,
-        },
-    ];
+    const configrations = {
+        url: 'https://react-demo-ff703-default-rtdb.firebaseio.com/meals.json',
+    }
 
     //********************************************************************************/
     //********************************************************************************/
 
     //------FUNCTIONS------//
+    //fetch meals
+    const preprocessor = (meals) => {
+        let mealsList = []
+        for (const key in meals) {
+            mealsList.push({
+                id: key,
+                name: meals[key].name,
+                description: meals[key].description,
+                price: meals[key].price,
+            })
+            setMealsData(mealsList)
+        }
+    }
+    useEffect(() => {
+        fetchMealsData(configrations, preprocessor)
+    }, [fetchMealsData])
 
     //cart functions
     const openCartHandler = () => {
         setIsCartOpened(prevState => !prevState)
+        setHasOrdered(false)
     }
 
     const orderCartHandler = () => {
-        alert('order recived :)')
+        setHasOrdered(prevState => !prevState)
     }
 
     const addCartItemHandler = (itemData) => {
@@ -133,19 +145,30 @@ export const ContextProvider = (props) => {
     const removeCartItemHandler = (name) => {
         dispatchCartItems({ type: 'REMOVE_ITEM', value: name })
     }
-
+    const resetCartHandler = () => {
+        dispatchCartItems({ type: 'RESET_CART' })
+    }
+    const handleIsOrderProcessing = () => {
+        setIsOrderProcessing(prevState => !prevState)
+    }
     //********************************************************************************/
     //********************************************************************************/
 
     const contextProviderValues = {
         isCartOpened: isCartOpened,
         mealsData: mealsData,
+        isLoading: isLoading,
+        error: error,
+        hasOrdered: hasOrdered,
         cartItemsState: cartItemsState,
+        isOrderProcessing: isOrderProcessing,
+        handleIsOrderProcessing: handleIsOrderProcessing,
         openCartHandler: openCartHandler,
         orderCartHandler: orderCartHandler,
         incrementCartItem: incrementCartItem,
         addCartItemHandler: addCartItemHandler,
         removeCartItemHandler: removeCartItemHandler,
+        resetCartHandler: resetCartHandler
 
     }
 

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react'
 import Context from '../../Context/Context';
 import CartItem from '../CartItem/CartItem';
+import Checkout from '../Checkout/Checkout';
 import { Modal } from '../Modal/Modal';
 import classes from './Cart.module.css'
 export const Cart = () => {
@@ -10,6 +11,13 @@ export const Cart = () => {
     if (cartHasItems) {
         totalAmount = `${contextAPI.cartItemsState.map(item => item.price * item.amount).reduce((acc, price) => acc + price).toFixed(2)}`
     }
+
+    const modalActions =
+        <div className={classes.actions}>
+            <button className={classes['button--alt']} onClick={contextAPI.openCartHandler} >Close</button>
+            {cartHasItems && <button className={classes.button} onClick={contextAPI.orderCartHandler}>Order</button>}
+        </div>
+
     return (
         <Modal key={'modal'}>
             <div>
@@ -24,10 +32,9 @@ export const Cart = () => {
                     <span>Total Amount</span>
                     <span>${totalAmount}</span>
                 </div>
-                <div className={classes.actions}>
-                    <button className={classes['button--alt']} onClick={contextAPI.openCartHandler} >Close</button>
-                    {cartHasItems && <button className={classes.button} onClick={contextAPI.orderCartHandler}>Order</button>}
-                </div>
+                {!contextAPI.hasOrdered && modalActions}
+                {contextAPI.hasOrdered && <Checkout />}
+                {contextAPI.isOrderProcessing && <p style={{ textAlign: 'center', fontSize: '4rem' }}>ordering...</p>}
             </div>
         </Modal>
     )

@@ -13,6 +13,7 @@ export const MealItemForm = ({ meal }) => {
         itemData['amount'] = enteredAmount
         console.log(itemData);
         contextAPI.addCartItemHandler(itemData)
+        amountRef.current.value = 1
     }
 
     return (
