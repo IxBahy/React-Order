@@ -34,7 +34,8 @@ const Checkout = (props) => {
                     firstName: this.firstName,
                     lastName: this.lastName,
                     email: this.email,
-                    street: this.street
+                    street: this.street,
+                    cartItems: contextAPI.cartItemsState
                 })
             }
         }
